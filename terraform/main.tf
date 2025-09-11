@@ -2,7 +2,7 @@
 # Data Variables
 ################################################################################3wes
 
-data "vcd_catalog" "PetClinic" {
+data "vcd_catalog" "lab-catalog" {
   org  = var.director_org
   name = var.catalog
 }
