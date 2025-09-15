@@ -249,7 +249,7 @@ def get_org_id(ibm_iam_access_token: str, director_url: str, org: str) -> str:
     endpoint_url = "/".join([director_url, "cloudapi", "1.0.0", "sessions"])
 
     headers = {"Authorization": f"Bearer {ibm_iam_access_token}; org={org}",
-               "Accept": "application/*;version=39.0"}
+               "Accept": "application/json;version=40.0.0-alpha"}
 
     log.debug("Getting ORG ID for {org}")
     r = s.post(url=endpoint_url, headers=headers)

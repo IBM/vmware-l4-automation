@@ -512,3 +512,180 @@ def upload_ovf(director_url: str, vmware_access_token: str, catalog_id: str, ovf
     r.raise_for_status()
 
     return r.json()
+
+
+def get_ipspaces(director_url: str, vmware_access_token: str) -> dict[str, Any]:
+    """Get a list of all IP Spaces
+
+    Args:
+        director_url: Resource reference, eg, https://dirw002.eu-de.vmware.cloud.ibm.com/api
+        vmware_access_token: A VMWare VCD Session token.
+
+    Returns:
+        A task object
+    
+    Raises:
+        requests.RequestException: all Requests package exceptions
+            can be raised due to, e.g., connection or authorization errors.
+    """
+
+    # request retry mechanism
+    s = requests_session()
+
+    endpoint_url = "/".join([director_url, "cloudapi", "1.0.0", "ipSpaces", "summaries"])
+
+    headers = {
+        "Authorization": f"Bearer {vmware_access_token}",
+        "Accept": "application/json;version=40.0.0-alpha",
+        "Content-Type": "application/json"
+    }
+
+    log.debug(f'Getting IP Spaces')
+
+    params: dict[str, int | str] = {
+        "pageSize": pageSize,
+        "filter": "id==urn:vcloud:ipSpace:f51bbb6f-22d0-409f-98db-b4cdead44c58"
+    }
+
+    page_number = 0
+    values = []
+    more_pages = True
+
+    while(more_pages):
+        page_number = page_number + 1
+        log.debug(f"Getting page {page_number}")
+        params["page"] = page_number
+
+        r = s.get(url=endpoint_url, headers=headers, params=params)
+        r.raise_for_status()
+
+        total = r.json()["resultTotal"]            
+        values = values + r.json()["values"]
+        more_pages = page_number*pageSize < total
+
+    return values
+
+def get_ipspace(director_url: str, vmware_access_token: str, ipspace_id: str) -> dict[str, Any]:
+    """Get an ip space
+
+    Args:
+        director_url: Resource reference, eg, https://dirw002.eu-de.vmware.cloud.ibm.com/api
+        vmware_access_token: A VMWare VCD Session token.
+        ipsapce_id: The id of an ip space
+
+    Returns:
+        An ip space object
+    
+    Raises:
+        requests.RequestException: all Requests package exceptions
+            can be raised due to, e.g., connection or authorization errors.
+    """
+
+    # request retry mechanism
+    s = requests_session()
+
+    endpoint_url = "/".join([director_url, "cloudapi", "1.0.0", "ipSpaces", ipspace_id])
+
+    headers = {
+        "Authorization": f"Bearer {vmware_access_token}",
+        "Accept": "application/json;version=40.0.0-alpha",
+        "Content-Type": "application/json"
+    }
+
+    log.debug(f'Getting IP Space')
+
+    r = s.get(url=endpoint_url, headers=headers)
+    r.raise_for_status()
+
+    return r.json()
+
+def ipspace_allocations(director_url: str, vmware_access_token: str, ipspace_id: str)  -> dict[str, Any]:
+    """Get a list of IP Allocations for a specific IP Space
+
+    Args:
+        director_url: Resource reference, eg, https://dirw002.eu-de.vmware.cloud.ibm.com/api
+        vmware_access_token: A VMWare VCD Session token.
+        ipspace_id: The ID of an IP Space, eg, urn:vcloud:ipSpace:f51bbb6f-22d0-409f-98db-b4cdead44c58
+
+    Returns:
+        A json object
+    
+    Raises:
+        requests.RequestException: all Requests package exceptions
+            can be raised due to, e.g., connection or authorization errors.
+    """
+
+    # request retry mechanism
+    s = requests_session()
+
+    endpoint_url = "/".join([director_url, "cloudapi", "1.0.0", "ipSpaces", ipspace_id, "allocations"])
+
+    headers = {
+        "Authorization": f"Bearer {vmware_access_token}",
+        "Accept": "application/json;version=40.0.0-alpha",
+        "Content-Type": "application/json"
+    }
+
+    log.debug(f'Getting IP Space Allocations')
+
+    params: dict[str, int | str] = {
+        "pageSize": pageSize,
+        "filter": "type==FLOATING_IP"
+    }
+    
+    log.debug(f'Getting IP Space Allocations')
+
+    page_number = 0
+    values = []
+    more_pages = True
+
+    while(more_pages):
+        page_number = page_number + 1
+        log.debug(f"Getting page {page_number}")
+        params["page"] = page_number
+
+        r = s.get(url=endpoint_url, headers=headers, params=params)
+        r.raise_for_status()
+
+        total = r.json()["resultTotal"]            
+        values = values + r.json()["values"]
+        more_pages = page_number*pageSize < total
+
+    return values
+
+
+def ipspaces_allocate_ip(director_url: str, vmware_access_token: str, ipspace_id: str) -> dict[str, Any]:
+    """Allocate an IP Address to an IP Space
+
+    Args:
+        director_url:  eg, https://dirw002.eu-de.vmware.cloud.ibm.com
+        vmware_access_token: A VMWare VCD Session token.
+        ipspace_id: The ID of the IP Space
+        public_ip: The IP address to allocate
+
+    Returns:
+        A task object
+    
+    Raises:
+        requests.RequestException: all Requests package exceptions
+            can be raised due to, e.g., connection or authorization errors.
+    """
+
+    # request retry mechanism
+    s = requests_session()
+
+    endpoint_url = "/".join([director_url, "cloudapi", "1.0.0", "ipSpaces", ipspace_id, "allocate"])
+
+    headers = {
+        "Authorization": f"Bearer {vmware_access_token}",
+        "Accept": "application/json;version=40.0.0-alpha",
+        "Content-Type": "application/json",
+    }
+
+    body = '{"type":"FLOATING_IP","quantity":1}'
+
+    log.debug(f'Allocating IP Address to IP Space')
+    r = s.post(url=endpoint_url, headers=headers, data=body)
+    r.raise_for_status()
+
+    return r.headers['location']
