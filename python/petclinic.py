@@ -216,7 +216,6 @@ def main() -> int:
 
     ipspaces =  cloud_director.get_ipspaces(director_url = env.director_url, 
                                             vmware_access_token = vmware_access_token)
-
     ipspace_id = ""
     for ipspace in ipspaces:
         ipspace_details = cloud_director.get_ipspace(director_url = env.director_url, 

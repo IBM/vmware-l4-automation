@@ -543,8 +543,7 @@ def get_ipspaces(director_url: str, vmware_access_token: str) -> dict[str, Any]:
     log.debug(f'Getting IP Spaces')
 
     params: dict[str, int | str] = {
-        "pageSize": pageSize,
-        "filter": "id==urn:vcloud:ipSpace:f51bbb6f-22d0-409f-98db-b4cdead44c58"
+        "pageSize": pageSize
     }
 
     page_number = 0
