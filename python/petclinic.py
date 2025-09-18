@@ -278,6 +278,22 @@ def main() -> int:
         cloud_director.wait_for_tasks(
                 vmware_access_token=vmware_access_token,
                 tasks=tasks)
+        
+        print(f'Uploading {len(catalog_items)} Catalog Items')
+        for catalog_item in catalog_items:
+                
+            try:
+                print(f'    Uploading {catalog_item}: {lab_catalog_items[catalog_item]}')
+                catalog_item = cloud_director.upload_ovf(director_url = env.director_url,
+                                                        vmware_access_token = vmware_access_token,
+                                                        catalog_id = catalog['id'].split(':')[-1],
+                                                        ovf_url = lab_catalog_items[catalog_item],
+                                                        item_name = catalog_item)
+
+            except Exception as e:
+                print((f'Failed to Upload Catalog Item: {catalog_item}'))
+                print(e)
+
     else:
         print("Nothing to do...")
 
