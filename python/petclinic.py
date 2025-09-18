@@ -14,9 +14,9 @@ from types import SimpleNamespace
 from netaddr import IPNetwork, IPAddress
 
 schematics_catalog = {
-    "petclinic" : {"folder": "tf-vdc-configure-v2",
-          "github": "https://github.ibm.com/IAAS-Solutions/vcfaaslab",
-          "workspace" : "vcfaas_lab01"}
+    "petclinic" : {"folder": "petclinic",
+          "github": "https://github.com/IBM/vmware-l4-automation.git",
+          "workspace" : "petclinic"}
 }
 
 lab_catalog = "PetClinic"
@@ -69,7 +69,7 @@ def generate_variable_store(env: dict, lab_number: str):
                     "value": f'{env.director_url}/api'
                     },                    
                     {
-                    "name": "director_org",
+                    "name": "director_org_name",
                     "value": env.director_org_name
                     },                    
                     {
@@ -78,7 +78,7 @@ def generate_variable_store(env: dict, lab_number: str):
                     "secure": True
                     },                                        
                     {
-                    "name": "vdc_name",
+                    "name": "director_vdc",
                     "value": env.director_vdc
                     },
                     {
