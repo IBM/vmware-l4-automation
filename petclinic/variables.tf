@@ -220,7 +220,7 @@ variable "firewall_rules" {
       logging = true
       source = ["web-servers"]
       destination = []
-      app_port_profile = ["HTTP", "HTTPS", "DNS-TCP", "DNS IN", "ICMP ALL"]
+      app_port_profile = []
     }
   }
 }
