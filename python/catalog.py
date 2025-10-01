@@ -132,15 +132,35 @@ def main() -> int:
     print(f'Checking Catalog for {lab_catalog}......')
     print('--------------------------------------------------------')
 
+    action_create_catalog = False
+    missing_catalog_items = catalog_items
     catalog_query = cloud_director.query_catalogs(director_url, vmware_access_token, filter=f'name=={lab_catalog}')
     if len(catalog_query) == 1:
-        action_create_catalog = False
         print(f'Found catalog {catalog_query[0]["name"]} with a HREF of : {catalog_query[0]["href"]}')
+        print(f'Retreiving Catalog Items....')
+        catalog = cloud_director.get_resource(vmware_access_token, catalog_query[0]["href"])
+        for catalog_item in catalog["catalogItems"]["catalogItem"]:
+             print(f'    - {catalog_item["name"]}')
+             if catalog_item["name"] in missing_catalog_items:
+                  missing_catalog_items.remove(catalog_item["name"])
 
     else:
-        print(f'Catalog {lab_catalog} does not exist and needs to be created.')
-        print('')
         action_create_catalog = True
+
+    print('')
+    if action_create_catalog:
+         print(f'Catalog {lab_catalog} does not exist and needs to be created.')
+         print('')
+    else:
+         print(f'Catalog {lab_catalog} exists and does NOT to be created.')
+         print('')
+
+    if len(missing_catalog_items) == 0:
+         print('All catalog items up to date, nothing to do...')
+    else:
+         print('The following catalog items need to be created:')
+         for item in missing_catalog_items:
+              print(f'    - {item}')
 
     # Manage Catalog
 
@@ -169,8 +189,10 @@ def main() -> int:
                 vmware_access_token=vmware_access_token,
                 tasks=tasks)
         
-        print(f'Uploading {len(catalog_items)} Catalog Items')
-        for catalog_item in catalog_items:
+    if len(missing_catalog_items) > 0:
+        
+        print(f'Uploading {len(missing_catalog_items)} Catalog Items')
+        for catalog_item in missing_catalog_items:
                 
             try:
                 print(f'    Uploading {catalog_item}: {lab_catalog_items[catalog_item]}')
@@ -185,7 +207,7 @@ def main() -> int:
                 print(e)
 
     else:
-        print("Nothing to do...")
+            print('Catalog Items up to date, nothing to do!!!')
 
 if __name__ == "__main__":
     exit(main())
